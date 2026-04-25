@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Achievement Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #080c18;
+  --surface:  #0f1628;
+  --surface2: #162040;
+  --surface3: #1e2d55;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.14);
+  --text:     #eef2ff;
+  --muted:    #7b88a8;
+  --accent:   #6ee7b7;
+  --blue:     #38bdf8;
+  --pink:     #f472b6;
+  --gold:     #fbbf24;
+  --purple:   #a78bfa;
+  --red:      #f87171;
+  --green:    #4ade80;
+  --FH:       'Syne', sans-serif;
+  --FB:       'DM Sans', sans-serif;
+  --r:        14px;
+  --rs:       8px;
+}
+
+body { font-family: var(--FB); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(56,189,248,.07) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 90%, rgba(167,139,250,.06) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ═══════════════════════ SHARED ═══════════════════════ */
+.page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.page.active { display: flex; }
+
+.glow {
+  position: absolute; width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,.09) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+}
+
+/* ═══════════════════════ LOGIN ═══════════════════════ */
+#login-page { align-items: center; justify-content: center; padding: 2rem; flex-direction: column; }
+
+.login-wrap { width: 100%; max-width: 960px; display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 24px; overflow: hidden; border: 1px solid var(--border2); animation: fadeUp .5s ease both; box-shadow: 0 40px 80px rgba(0,0,0,.5); }
+@media (max-width: 700px) { .login-wrap { grid-template-columns: 1fr; } .login-brand { display: none; } }
+
+.login-brand {
+  background: linear-gradient(135deg, #0f2050 0%, #162040 100%);
+  padding: 3rem;
+  display: flex; flex-direction: column; justify-content: center; gap: 2rem;
+  position: relative; overflow: hidden;
+}
+.login-brand::after {
+  content: '';
+  position: absolute; bottom: -60px; right: -60px;
+  width: 250px; height: 250px; border-radius: 50%;
+  border: 40px solid rgba(56,189,248,.08);
+}
+.lb-logo { display: flex; align-items: center; gap: 12px; }
+.lb-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--blue), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.lb-title { font-family: var(--FH); font-size: 22px; font-weight: 800; }
+.lb-title span { color: var(--blue); }
+.lb-headline { font-family: var(--FH); font-size: 30px; font-weight: 800; line-height: 1.25; letter-spacing: -.5px; }
+.lb-headline em { color: var(--blue); font-style: normal; }
+.lb-desc { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+.lb-chips { display: flex; flex-direction: column; gap: 8px; }
+.lb-chip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.lb-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.login-form-side { background: var(--surface); padding: 3rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+.login-tabs { display: flex; gap: 8px; background: var(--surface2); border-radius: 10px; padding: 4px; }
+.ltab { flex: 1; padding: 8px; border-radius: 7px; border: none; background: transparent; color: var(--muted); font-family: var(--FH); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.ltab.active { background: var(--surface3); color: var(--text); }
+.login-title { font-family: var(--FH); font-size: 22px; font-weight: 700; }
+.login-sub { font-size: 13px; color: var(--muted); font-weight: 300; margin-top: -1rem; }
+.fgroup { display: flex; flex-direction: column; gap: 6px; }
+.flabel { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+.finput {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs);
+  padding: 11px 14px; color: var(--text); font-family: var(--FB); font-size: 14px; outline: none; transition: border-color .2s;
+}
+.finput:focus { border-color: var(--blue); }
+.finput::placeholder { color: var(--muted); }
+.ferr { color: var(--red); font-size: 12px; display: none; margin-top: 2px; }
+.demo-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.demo-chip { background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 11px; cursor: pointer; color: var(--muted); transition: all .2s; }
+.demo-chip:hover { border-color: var(--blue); color: var(--blue); }
+.submit-btn { width: 100%; background: var(--blue); color: #080c18; border: none; border-radius: var(--rs); padding: 13px; font-family: var(--FH); font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; }
+.submit-btn:hover { background: #7dd3fc; transform: translateY(-1px); }
+.submit-btn.green { background: var(--green); }
+.submit-btn.green:hover { background: #86efac; }
+
+/* ═══════════════════════ TOPBAR ═══════════════════════ */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+  background: rgba(8,12,24,.85); backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+}
+.tb-logo { font-family: var(--FH); font-size: 17px; font-weight: 800; }
+.tb-logo span { color: var(--blue); }
+.tb-badge { font-size: 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 3px 10px; color: var(--muted); margin-left: 8px; }
+.tb-right { display: flex; align-items: center; gap: 10px; }
+.user-pill { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 5px 14px 5px 8px; font-size: 13px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; font-family: var(--FH); }
+.logout-btn { background: transparent; border: 1px solid var(--border2); border-radius: var(--rs); color: var(--muted); padding: 6px 12px; font-size: 12px; cursor: pointer; transition: all .2s; font-family: var(--FB); }
+.logout-btn:hover { color: var(--text); border-color: var(--border2); }
+
+/* ═══════════════════════ STUDENT DASHBOARD ═══════════════════════ */
+#student-page { flex-direction: column; }
+.main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; width: 100%; }
+
+.greet { margin-bottom: 2rem; animation: fadeUp .4s ease both; }
+.greet h1 { font-family: var(--FH); font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+.greet p { color: var(--muted); font-size: 14px; margin-top: 4px; font-weight: 300; }
+
+.stu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 768px) { .stu-grid { grid-template-columns: 1fr; } }
+
+/* status card */
+.status-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); padding: 1.5rem; animation: fadeUp .4s .1s ease both; }
+.sc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+.sc-title { font-family: var(--FH); font-size: 14px; font-weight: 700; }
+.sc-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+.ss-draft    { background: rgba(251,191,36,.15); color: var(--gold); border: 1px solid rgba(251,191,36,.3); }
+.ss-submitted{ background: rgba(56,189,248,.15); color: var(--blue); border: 1px solid rgba(56,189,248,.3); }
+.ss-approved { background: rgba(110,231,183,.15); color: var(--accent); border: 1px solid rgba(110,231,183,.3); }
+.ss-none     { background: rgba(248,113,113,.15); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+
+.sc-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.sc-actions { display: flex; gap: 8px; margin-top: 1.2rem; }
+.btn { padding: 8px 16px; border-radius: var(--rs); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; font-family: var(--FH); }
+.btn-primary { background: var(--blue); color: #080c18; }
+.btn-primary:hover { background: #7dd3fc; }
+.btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn-danger  { background: rgba(248,113,113,.15); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
+.btn-danger:hover { background: rgba(248,113,113,.25); }
+
+/* quick stats */
+.quick-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; animation: fadeUp .4s .15s ease both; }
+.qs { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; text-align: center; }
+.qs-num { font-family: var(--FH); font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.qs-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+/* ═══════════════════════ FORM PAGE ═══════════════════════ */
+#form-page { flex-direction: column; }
+
+.form-container { max-width: 780px; margin: 0 auto; padding: 2.5rem 2rem; width: 100%; animation: fadeUp .4s ease both; }
+.form-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); overflow: hidden; }
+
+.form-banner { background: linear-gradient(135deg, #0f2050, #162040); padding: 2rem; display: flex; align-items: center; gap: 1rem; }
+.fb-icon { width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, var(--blue), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.fb-title { font-family: var(--FH); font-size: 20px; font-weight: 800; }
+.fb-sub { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 300; }
+
+.form-body { padding: 2rem; display: flex; flex-direction: column; gap: 1.4rem; }
+
+.form-section-title { font-family: var(--FH); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--blue); margin-bottom: -0.4rem; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+.fgroup textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs);
+  padding: 11px 14px; color: var(--text); font-family: var(--FB); font-size: 14px; outline: none;
+  transition: border-color .2s; resize: vertical; min-height: 80px;
+}
+.fgroup textarea:focus { border-color: var(--blue); }
+.fgroup textarea::placeholder { color: var(--muted); }
+.fgroup select {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs);
+  padding: 11px 14px; color: var(--text); font-family: var(--FB); font-size: 14px; outline: none;
+  transition: border-color .2s; appearance: none; cursor: pointer;
+}
+.fgroup select:focus { border-color: var(--blue); }
+.fgroup select option { background: var(--surface2); }
+
+.form-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.score-input-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); padding: 1rem; }
+.sic-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.sic-icon { font-size: 16px; margin-bottom: 6px; display: block; }
+.sic-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border2); color: var(--text); font-family: var(--FH); font-size: 22px; font-weight: 800; padding: 4px 0; outline: none; }
+.sic-input:focus { border-bottom-color: var(--blue); }
+
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; padding-top: .5rem; border-top: 1px solid var(--border); }
+.form-progress { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.fp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.fp-dot.done { background: var(--accent); }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 1rem 1.4rem; font-size: 13px; z-index: 9999;
+  box-shadow: 0 20px 40px rgba(0,0,0,.4);
+  transform: translateY(100px); opacity: 0; transition: all .3s ease;
+  display: flex; align-items: center; gap: 10px; max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 18px; }
+.toast-text { color: var(--text); }
+
+/* ═══════════════════════ ADMIN DASHBOARD ═══════════════════════ */
+#admin-page { flex-direction: column; }
+.admin-topbar { background: linear-gradient(135deg, rgba(15,32,80,.9), rgba(22,32,64,.9)); border-bottom: 1px solid var(--border2); }
+
+.admin-main { max-width: 1300px; margin: 0 auto; padding: 2.5rem 2rem; width: 100%; }
+
+.admin-banner { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); padding: 1.5rem 2rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1.5rem; animation: fadeUp .4s ease both; }
+.ab-stat { text-align: center; }
+.ab-num { font-family: var(--FH); font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.ab-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .8px; }
+.ab-div { width: 1px; background: var(--border); align-self: stretch; }
+@media (max-width: 600px) { .ab-div { display: none; } }
+
+/* admin controls */
+.admin-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; flex-wrap: wrap; animation: fadeUp .4s .1s ease both; }
+.search-box { flex: 1; min-width: 200px; position: relative; }
+.search-box input { width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--rs); padding: 9px 14px 9px 38px; color: var(--text); font-family: var(--FB); font-size: 13px; outline: none; transition: border-color .2s; }
+.search-box input:focus { border-color: var(--blue); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+.filter-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: all .2s; color: var(--muted); font-family: var(--FB); white-space: nowrap; }
+.filter-btn.active, .filter-btn:hover { border-color: var(--blue); color: var(--blue); background: rgba(56,189,248,.08); }
+
+/* submissions table */
+.submissions-table { width: 100%; border-collapse: collapse; animation: fadeUp .4s .15s ease both; }
+.submissions-table thead th { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 12px 14px; font-family: var(--FH); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); text-align: left; white-space: nowrap; }
+.submissions-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; cursor: pointer; }
+.submissions-table tbody tr:hover { background: rgba(56,189,248,.03); }
+.submissions-table tbody td { padding: 13px 14px; font-size: 13px; vertical-align: middle; }
+
+.stu-cell { display: flex; align-items: center; gap: 10px; }
+.stu-name { font-family: var(--FH); font-size: 14px; font-weight: 700; }
+.stu-roll { font-size: 11px; color: var(--muted); }
+.score-pill { font-family: var(--FH); font-size: 15px; font-weight: 800; }
+.tier-badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.tier-exc    { background: rgba(110,231,183,.15); color: var(--accent); border: 1px solid rgba(110,231,183,.3); }
+.tier-good   { background: rgba(56,189,248,.15);  color: var(--blue); border: 1px solid rgba(56,189,248,.3); }
+.tier-avg    { background: rgba(251,191,36,.15);   color: var(--gold); border: 1px solid rgba(251,191,36,.3); }
+.tier-risk   { background: rgba(248,113,113,.15);  color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+.sub-status  { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+
+.admin-actions { display: flex; gap: 6px; }
+.action-btn { padding: 5px 10px; border-radius: var(--rs); font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid; transition: all .2s; white-space: nowrap; font-family: var(--FH); }
+.ab-approve { border-color: rgba(110,231,183,.4); color: var(--accent); background: rgba(110,231,183,.08); }
+.ab-approve:hover { background: rgba(110,231,183,.2); }
+.ab-reject  { border-color: rgba(248,113,113,.4); color: var(--red); background: rgba(248,113,113,.08); }
+.ab-reject:hover { background: rgba(248,113,113,.2); }
+.ab-view    { border-color: var(--border2); color: var(--muted); background: transparent; }
+.ab-view:hover { border-color: var(--blue); color: var(--blue); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+.empty-icon { font-size: 48px; margin-bottom: 1rem; }
+.empty-title { font-family: var(--FH); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+
+/* modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 2rem; backdrop-filter: blur(4px); }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; animation: fadeUp .3s ease both; }
+.modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 10; }
+.modal-title { font-family: var(--FH); font-size: 18px; font-weight: 800; }
+.modal-close { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); color: var(--muted); width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.modal-body { padding: 2rem; }
+.modal-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.modal-field { flex: 1; min-width: 150px; }
+.mf-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.mf-val { font-size: 14px; font-weight: 500; }
+.modal-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 1rem 0; }
+.msc { background: var(--surface2); border-radius: var(--rs); padding: 12px; text-align: center; border: 1px solid var(--border); }
+.msc-icon { font-size: 18px; margin-bottom: 4px; }
+.msc-val { font-family: var(--FH); font-size: 22px; font-weight: 800; }
+.msc-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.modal-note { background: var(--surface2); border-radius: var(--rs); padding: 1rem; font-size: 13px; color: var(--muted); line-height: 1.6; border-left: 3px solid var(--blue); }
+.modal-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.modal-avg { font-family: var(--FH); font-size: 36px; font-weight: 800; text-align: center; margin: 1rem 0; letter-spacing: -1px; }
+.avg-label { font-size: 12px; color: var(--muted); text-align: center; margin-top: -10px; }
+
+/* section title */
+.section-title { font-family: var(--FH); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 1rem; }
+
+/* table wrapper */
+.table-wrap { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r); overflow: hidden; overflow-x: auto; animation: fadeUp .4s .2s ease both; }
+.no-submissions { padding: 3rem; text-align: center; color: var(--muted); font-size: 14px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* admin note card */
+.admin-note-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); padding: 1rem; }
+.anc-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.anc-val { font-size: 13px; line-height: 1.6; }
+
+.bar-track { background: var(--surface2); border-radius: 4px; height: 5px; margin-top: 8px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+/* ═══ DOCUMENT UPLOAD ═══ */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--r); padding: 1.5rem;
+  text-align: center; cursor: pointer; transition: all .2s; background: var(--surface2);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: rgba(56,189,248,.06); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.uz-icon { font-size: 28px; margin-bottom: 6px; }
+.uz-title { font-family: var(--FH); font-size: 14px; font-weight: 700; color: var(--text); }
+.uz-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.uploaded-files-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ufl-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border2); border-radius: var(--rs);
+  padding: 10px 14px; font-size: 13px;
+}
+.ufl-icon { font-size: 18px; flex-shrink: 0; }
+.ufl-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ufl-size { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.ufl-remove { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 0 4px; flex-shrink: 0; opacity: .7; }
+.ufl-remove:hover { opacity: 1; }
+.doc-download-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--rs); font-size: 12px; font-weight: 600;
+  background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.35); color: var(--blue);
+  cursor: pointer; text-decoration: none; transition: all .2s;
+}
+.doc-download-btn:hover { background: rgba(56,189,248,.22); }
+.doc-list-admin { display: flex; flex-direction: column; gap: 8px; }
+.dla-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rs); padding: 10px 14px; }
+.dla-info { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
+.dla-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dla-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+/* chart area */
+.chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 1rem; }
+.cb { flex: 1; border-radius: 4px 4px 0 0; min-width: 20px; position: relative; transition: height .6s ease; }
+.cb-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--muted); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span class="toast-text" id="toast-text">Saved successfully</span>
+</div>
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Student Detail</div>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════════════════ -->
+<div id="login-page" class="page active">
+  <div class="glow"></div>
+  <div class="login-wrap">
+
+    <!-- brand panel -->
+    <div class="login-brand">
+      <div class="lb-logo">
+        <div class="lb-icon">🏆</div>
+        <div class="lb-title">Student<span>AP</span></div>
+      </div>
+      <div>
+        <div class="lb-headline">Student <em>Achievement</em><br>Program</div>
+        <div class="lb-desc" style="margin-top:.8rem">G H Raisoni College of Engineering &amp; Management, Pune · Dept. of Information Technology · Academic Year 2025-26</div>
+      </div>
+      <div class="lb-chips">
+        <div class="lb-chip"><div class="lb-dot" style="background:var(--blue)"></div> Students submit their achievement records</div>
+        <div class="lb-chip"><div class="lb-dot" style="background:var(--accent)"></div> Admin reviews, approves &amp; manages all submissions</div>
+        <div class="lb-chip"><div class="lb-dot" style="background:var(--gold)"></div> Real-time dashboard with tier classification</div>
+      </div>
+    </div>
+
+    <!-- form panel -->
+    <div class="login-form-side">
+      <div class="login-tabs">
+        <button class="ltab active" id="tab-student" onclick="switchTab('student')">Student Login</button>
+        <button class="ltab" id="tab-admin" onclick="switchTab('admin')">Admin Login</button>
+      </div>
+
+      <!-- student login -->
+      <div id="stu-login">
+        <div class="login-title" id="login-title">Welcome back 👋</div>
+        <div class="login-sub" id="login-sub">Sign in to submit your achievement record.</div>
+        <div style="margin-top:.5rem">
+          <div class="flabel" style="margin-bottom:4px">Demo Students</div>
+          <div class="demo-row">
+            <div class="demo-chip" onclick="fillStu('arjun.sharma@ghrcem.edu','stu123')">Arjun Sharma</div>
+            <div class="demo-chip" onclick="fillStu('priya.patel@ghrcem.edu','stu123')">Priya Patel</div>
+            <div class="demo-chip" onclick="fillStu('rahul.verma@ghrcem.edu','stu123')">Rahul Verma</div>
+            <div class="demo-chip" onclick="fillStu('sneha.joshi@ghrcem.edu','stu123')">Sneha Joshi</div>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Student Email</label>
+          <input class="finput" id="stu-email" type="email" placeholder="yourname@ghrcem.edu">
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Password</label>
+          <input class="finput" id="stu-pass" type="password" placeholder="••••••••">
+          <div class="ferr" id="stu-err">Invalid credentials. Try a demo above.</div>
+        </div>
+        <button class="submit-btn green" onclick="doStudentLogin()">Sign In as Student →</button>
+      </div>
+
+      <!-- admin login -->
+      <div id="admin-login" style="display:none">
+        <div class="login-title">Admin Portal 🛡️</div>
+        <div class="login-sub">Restricted to authorised administrators only.</div>
+        <div style="margin-top:.5rem">
+          <div class="flabel" style="margin-bottom:4px">Demo Admin</div>
+          <div class="demo-row">
+            <div class="demo-chip" onclick="fillAdmin('admin@ghrcem.edu','admin2026')">HOD / Admin</div>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Admin Email</label>
+          <input class="finput" id="adm-email" type="email" placeholder="admin@ghrcem.edu">
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Admin Password</label>
+          <input class="finput" id="adm-pass" type="password" placeholder="••••••••">
+          <div class="ferr" id="adm-err">Invalid admin credentials.</div>
+        </div>
+        <button class="submit-btn" onclick="doAdminLogin()">Sign In as Admin →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STUDENT DASHBOARD
+═══════════════════════════════════════════════════════════ -->
+<div id="student-page" class="page">
+  <div class="topbar">
+    <div><span class="tb-logo">Student<span>AP</span></span><span class="tb-badge">Student Portal</span></div>
+    <div class="tb-right">
+      <div class="user-pill">
+        <div class="avatar" id="stu-avatar" style="background:linear-gradient(135deg,#38bdf8,#6ee7b7)">AS</div>
+        <span id="stu-topname">Arjun Sharma</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="greet">
+      <h1 id="stu-greet">Hello, Arjun! 👋</h1>
+      <p>S.Y. B.Tech. Information Technology · Academic Year 2025-26</p>
+    </div>
+
+    <div class="stu-grid">
+      <!-- submission status card -->
+      <div class="status-card" style="grid-column: 1 / -1">
+        <div class="sc-header">
+          <div class="sc-title">📋 My Achievement Submission</div>
+          <div class="sc-status" id="stu-status-badge">Not Submitted</div>
+        </div>
+        <div class="sc-body" id="stu-status-body">You have not submitted your achievement record yet. Fill in your scores and achievements to get started.</div>
+        <div class="sc-actions" id="stu-status-actions">
+          <button class="btn btn-primary" onclick="goToForm('new')">+ Create Submission</button>
+        </div>
+      </div>
+
+      <!-- quick stats -->
+      <div class="quick-stats" style="grid-template-columns: 1fr">
+        <div class="qs">
+          <div class="qs-num" id="qs-submit-num" style="color:var(--gold)">—</div>
+          <div class="qs-label">Status</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FORM PAGE
+═══════════════════════════════════════════════════════════ -->
+<div id="form-page" class="page">
+  <div class="topbar">
+    <div><span class="tb-logo">Student<span>AP</span></span><span class="tb-badge">Achievement Form</span></div>
+    <div class="tb-right">
+      <button class="logout-btn" onclick="goToDash()">← Back to Dashboard</button>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-banner">
+        <div class="fb-icon">📝</div>
+        <div>
+          <div class="fb-title">Achievement Record Form</div>
+          <div class="fb-sub">S.Y. B.Tech. IT · Academic Year 2025-26 · <span id="form-student-name">Student</span></div>
+        </div>
+      </div>
+
+      <div class="form-body">
+        <!-- PERSONAL INFO -->
+        <div class="form-section-title">Personal Information</div>
+        <div class="form-row">
+          <div class="fgroup">
+            <label class="flabel">Full Name</label>
+            <input class="finput" id="f-name" type="text" placeholder="Your full name" readonly>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Roll Number</label>
+            <input class="finput" id="f-roll" type="text" placeholder="e.g. C-45" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fgroup">
+            <label class="flabel">Email</label>
+            <input class="finput" id="f-email" type="email" readonly>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Branch</label>
+            <input class="finput" id="f-branch" value="Information Technology" readonly>
+          </div>
+        </div>
+
+        <!-- ACHIEVEMENTS -->
+        <div class="form-section-title" style="margin-top:.5rem">Achievements &amp; Extra-Curricular</div>
+        <div class="form-row">
+          <div class="fgroup">
+            <label class="flabel">Achievement Title</label>
+            <input class="finput" id="f-ach1" type="text" placeholder="e.g. Hackathon Winner, Merit Award…">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Achievement Category</label>
+            <select id="f-ach1-cat">
+              <option value="">Select category</option>
+              <option>Academic Excellence</option>
+              <option>Sports</option>
+              <option>Cultural</option>
+              <option>Technical Competition</option>
+              <option>Community Service</option>
+              <option>Research / Publication</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fgroup">
+            <label class="flabel">Second Achievement (optional)</label>
+            <input class="finput" id="f-ach2" type="text" placeholder="e.g. NSS Volunteer, Coding Club Lead…">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Date / Semester</label>
+            <input class="finput" id="f-ach2-date" type="text" placeholder="e.g. Sem 4, Mar 2026">
+          </div>
+        </div>
+
+        <!-- DOCUMENT UPLOAD -->
+        <div class="form-section-title" style="margin-top:.5rem">📎 Upload Supporting Documents</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:300">Upload certificates, mark-sheets, activity proof, or any supporting documents (PDF, JPG, PNG, DOCX). Max 5 files · 5 MB each.</div>
+        <div class="upload-zone" id="upload-zone"
+             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" id="doc-upload-input" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.doc"
+                 onchange="handleFileSelect(event)">
+          <div class="uz-icon">📂</div>
+          <div class="uz-title">Click to browse or drag &amp; drop files here</div>
+          <div class="uz-sub">PDF, JPG, PNG, DOCX · Max 5 MB per file</div>
+        </div>
+        <div class="uploaded-files-list" id="uploaded-files-list"></div>
+
+        <!-- STATEMENT -->
+        <div class="form-section-title" style="margin-top:.5rem">Student Statement</div>
+        <div class="fgroup">
+          <label class="flabel">Describe your academic journey &amp; goals this semester</label>
+          <textarea id="f-statement" placeholder="Briefly describe your efforts, challenges overcome, and what you aim to achieve next…"></textarea>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="form-actions">
+          <div class="form-progress" id="form-progress-info">
+            <div class="fp-dot" id="fp-dot"></div>
+            <span id="fp-text">Draft — not yet submitted</span>
+          </div>
+          <button class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
+          <button class="btn btn-primary" onclick="submitForm()">Submit Achievement →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ADMIN DASHBOARD
+═══════════════════════════════════════════════════════════ -->
+<div id="admin-page" class="page">
+  <div class="topbar admin-topbar">
+    <div><span class="tb-logo">Student<span>AP</span></span><span class="tb-badge" style="border-color:rgba(167,139,250,.4);color:var(--purple)">🛡️ Admin</span></div>
+    <div class="tb-right">
+      <div class="user-pill">
+        <div class="avatar" style="background:linear-gradient(135deg,#a78bfa,#f472b6)">AD</div>
+        <span>Administrator</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+    <div class="greet" style="animation: fadeUp .4s ease both">
+      <h1 style="font-family:var(--FH);font-size:28px;font-weight:800;letter-spacing:-.5px">Admin Dashboard 🛡️</h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:4px;font-weight:300">Student Achievement Program · G H Raisoni College · Dept. of IT · 2025-26</p>
+    </div>
+
+    <!-- Summary banner -->
+    <div class="admin-banner" id="admin-banner">
+      <div class="ab-stat"><div class="ab-num" id="adm-total" style="color:var(--blue)">0</div><div class="ab-label">Total Students</div></div>
+      <div class="ab-div"></div>
+      <div class="ab-stat"><div class="ab-num" id="adm-submitted" style="color:var(--accent)">0</div><div class="ab-label">Submitted</div></div>
+      <div class="ab-div"></div>
+      <div class="ab-stat"><div class="ab-num" id="adm-approved" style="color:var(--green)">0</div><div class="ab-label">Approved</div></div>
+      <div class="ab-div"></div>
+      <div class="ab-stat"><div class="ab-num" id="adm-draft" style="color:var(--gold)">0</div><div class="ab-label">Draft / Pending</div></div>
+
+    </div>
+
+    <!-- Controls -->
+    <div class="admin-controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="admin-search" placeholder="Search by name or roll number…" oninput="renderAdminTable()">
+      </div>
+      <button class="filter-btn active" onclick="adminFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="adminFilter('submitted',this)">Submitted</button>
+      <button class="filter-btn" onclick="adminFilter('approved',this)">Approved</button>
+      <button class="filter-btn" onclick="adminFilter('draft',this)">Draft</button>
+    </div>
+
+    <!-- Table -->
+    <div class="section-title">Student Submissions</div>
+    <div class="table-wrap">
+      <table class="submissions-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Roll No.</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+      <div class="no-submissions" id="admin-empty" style="display:none">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">No submissions yet</div>
+        <div>Students haven't submitted their achievement records yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DOCUMENT UPLOAD
+// ═══════════════════════════════════════════════════════
+let pendingFiles = []; // {name, size, type, dataUrl}
+
+function getFileIcon(type) {
+  if (type.includes('pdf')) return '📄';
+  if (type.includes('image')) return '🖼️';
+  if (type.includes('word') || type.includes('docx') || type.includes('doc')) return '📝';
+  return '📎';
+}
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function handleFileSelect(e) { processFiles(Array.from(e.target.files)); e.target.value = ''; }
+function handleDragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('upload-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  processFiles(Array.from(e.dataTransfer.files));
+}
+
+function processFiles(files) {
+  const allowed = ['application/pdf','image/jpeg','image/png','image/jpg',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/msword'];
+  const maxSize = 5 * 1024 * 1024;
+  files.forEach(file => {
+    if (pendingFiles.length >= 5) { showToast('Max 5 files allowed', '⚠️'); return; }
+    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|docx|doc)$/i)) {
+      showToast(`${file.name}: unsupported type`, '⚠️'); return;
+    }
+    if (file.size > maxSize) { showToast(`${file.name}: exceeds 5 MB`, '⚠️'); return; }
+    if (pendingFiles.find(f => f.name === file.name)) { showToast(`${file.name} already added`, '⚠️'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      pendingFiles.push({ name: file.name, size: file.size, type: file.type, dataUrl: ev.target.result });
+      renderFileList();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeFile(idx) { pendingFiles.splice(idx, 1); renderFileList(); }
+
+function renderFileList() {
+  const list = document.getElementById('uploaded-files-list');
+  if (!pendingFiles.length) { list.innerHTML = ''; return; }
+  list.innerHTML = pendingFiles.map((f, i) => `
+    <div class="ufl-item">
+      <span class="ufl-icon">${getFileIcon(f.type)}</span>
+      <span class="ufl-name" title="${f.name}">${f.name}</span>
+      <span class="ufl-size">${formatSize(f.size)}</span>
+      <button class="ufl-remove" onclick="removeFile(${i})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function loadFilesIntoForm(files) {
+  pendingFiles = files ? [...files] : [];
+  renderFileList();
+}
+
+
+const STUDENTS = {
+  'arjun.sharma@ghrcem.edu':   { password: 'stu123', name: 'Arjun Sharma',  roll: 'C-45', initials: 'AS', color: 'linear-gradient(135deg,#38bdf8,#6ee7b7)' },
+  'priya.patel@ghrcem.edu':    { password: 'stu123', name: 'Priya Patel',   roll: 'C-46', initials: 'PP', color: 'linear-gradient(135deg,#f472b6,#a78bfa)' },
+  'rahul.verma@ghrcem.edu':    { password: 'stu123', name: 'Rahul Verma',   roll: 'C-47', initials: 'RV', color: 'linear-gradient(135deg,#fbbf24,#f87171)' },
+  'sneha.joshi@ghrcem.edu':    { password: 'stu123', name: 'Sneha Joshi',   roll: 'C-48', initials: 'SJ', color: 'linear-gradient(135deg,#6ee7b7,#38bdf8)' },
+  'karan.desai@ghrcem.edu':    { password: 'stu123', name: 'Karan Desai',   roll: 'C-49', initials: 'KD', color: 'linear-gradient(135deg,#a78bfa,#f472b6)' },
+  'ananya.rao@ghrcem.edu':     { password: 'stu123', name: 'Ananya Rao',    roll: 'C-50', initials: 'AR', color: 'linear-gradient(135deg,#f87171,#fbbf24)' },
+};
+
+const ADMIN = { email: 'admin@ghrcem.edu', password: 'admin2026' };
+
+// Submissions store: { email: { exam, assign, attend, online, project, ach1, ach1cat, ach2, ach2date, statement, status:'draft'|'submitted'|'approved'|'rejected', submittedAt, approvedAt, adminNote } }
+let SUBMISSIONS = {};
+let currentUser  = null; // { type:'student'|'admin', email, ...data }
+let adminFilter_ = 'all';
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function statusBadgeHTML(status) {
+  const map = {
+    draft:     '<span class="sc-status ss-draft">🖊 Draft</span>',
+    submitted: '<span class="sc-status ss-submitted">📤 Submitted</span>',
+    approved:  '<span class="sc-status ss-approved">✅ Approved</span>',
+    rejected:  '<span class="sc-status" style="background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)">❌ Rejected</span>',
+    none:      '<span class="sc-status ss-none">⬜ Not Submitted</span>',
+  };
+  return map[status] || map.none;
+}
+
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-text').textContent  = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════
+function switchTab(type) {
+  document.getElementById('tab-student').classList.toggle('active', type === 'student');
+  document.getElementById('tab-admin').classList.toggle('active', type === 'admin');
+  document.getElementById('stu-login').style.display   = type === 'student' ? '' : 'none';
+  document.getElementById('admin-login').style.display = type === 'admin'   ? '' : 'none';
+}
+
+function fillStu(e, p) {
+  document.getElementById('stu-email').value = e;
+  document.getElementById('stu-pass').value  = p;
+}
+
+function fillAdmin(e, p) {
+  document.getElementById('adm-email').value = e;
+  document.getElementById('adm-pass').value  = p;
+}
+
+function doStudentLogin() {
+  const email = document.getElementById('stu-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('stu-pass').value;
+  const err   = document.getElementById('stu-err');
+  const stu   = STUDENTS[email];
+  if (!stu || stu.password !== pass) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  currentUser = { type: 'student', email, ...stu };
+  renderStudentDash();
+  showPage('student-page');
+}
+
+function doAdminLogin() {
+  const email = document.getElementById('adm-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('adm-pass').value;
+  const err   = document.getElementById('adm-err');
+  if (email !== ADMIN.email || pass !== ADMIN.password) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  currentUser = { type: 'admin' };
+  renderAdminDash();
+  showPage('admin-page');
+}
+
+function doLogout() {
+  currentUser = null;
+  // clear inputs
+  ['stu-email','stu-pass','adm-email','adm-pass'].forEach(id => document.getElementById(id).value = '');
+  showPage('login-page');
+}
+
+document.getElementById('stu-pass').addEventListener('keydown', e => { if(e.key==='Enter') doStudentLogin(); });
+document.getElementById('adm-pass').addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin(); });
+
+// ═══════════════════════════════════════════════════════
+// STUDENT DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderStudentDash() {
+  const { name, email, initials, color } = currentUser;
+  document.getElementById('stu-avatar').style.background = color;
+  document.getElementById('stu-avatar').textContent = initials;
+  document.getElementById('stu-topname').textContent = name;
+  document.getElementById('stu-greet').textContent = `Hello, ${name.split(' ')[0]}! 👋`;
+
+  const sub = SUBMISSIONS[email];
+
+  // status card
+  const statusBadge = document.getElementById('stu-status-badge');
+  const statusBody  = document.getElementById('stu-status-body');
+  const statusActs  = document.getElementById('stu-status-actions');
+
+  if (!sub) {
+    statusBadge.innerHTML = statusBadgeHTML('none');
+    statusBody.textContent = 'You have not submitted your achievement record yet. Fill in your achievements to get started.';
+    statusActs.innerHTML = '<button class="btn btn-primary" onclick="goToForm(\'new\')">+ Create Submission</button>';
+    document.getElementById('qs-submit-num').textContent = '—';
+    return;
+  }
+
+  statusBadge.innerHTML = statusBadgeHTML(sub.status);
+
+  const statusMessages = {
+    draft:     'Your achievement record is saved as a draft. Review and submit it when ready.',
+    submitted: 'Your record has been submitted and is pending admin review. You can still edit it.',
+    approved:  'Your achievement record has been approved by the admin. 🎉',
+    rejected:  'Your submission was returned. Please review the admin note and resubmit.',
+  };
+  statusBody.textContent = statusMessages[sub.status] || '';
+
+  const canEdit = sub.status !== 'approved';
+  let actions = '';
+  if (canEdit) actions += `<button class="btn btn-primary" onclick="goToForm('edit')">✏️ Edit Submission</button>`;
+  if (sub.status === 'draft') actions += `<button class="btn btn-outline" onclick="submitFromDash()">📤 Submit Now</button>`;
+  statusActs.innerHTML = actions;
+
+  document.getElementById('qs-submit-num').textContent = sub.status.charAt(0).toUpperCase() + sub.status.slice(1);
+
+  if (sub.adminNote) {
+    const pcard = document.getElementById('score-preview-card');
+    if (pcard) {
+      pcard.style.display = '';
+      document.getElementById('score-preview-content').innerHTML = `<div style="background:var(--surface2);border-radius:var(--rs);padding:.8rem;font-size:12px;color:var(--muted);border-left:3px solid var(--blue)"><b style="color:var(--blue)">Admin Note:</b> ${sub.adminNote}</div>`;
+    }
+  }
+}
+
+function goToDash() { renderStudentDash(); showPage('student-page'); }
+
+function submitFromDash() {
+  const email = currentUser.email;
+  if (SUBMISSIONS[email]) {
+    SUBMISSIONS[email].status = 'submitted';
+    SUBMISSIONS[email].submittedAt = new Date().toLocaleString();
+    showToast('Achievement record submitted!', '📤');
+    renderStudentDash();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FORM
+// ═══════════════════════════════════════════════════════
+function goToForm(mode) {
+  const s = currentUser;
+  document.getElementById('form-student-name').textContent = s.name;
+  document.getElementById('f-name').value   = s.name;
+  document.getElementById('f-roll').value   = s.roll;
+  document.getElementById('f-email').value  = s.email;
+
+  const sub = SUBMISSIONS[s.email];
+  if (mode === 'edit' && sub) {
+    document.getElementById('f-ach1').value      = sub.ach1    || '';
+    document.getElementById('f-ach1-cat').value  = sub.ach1cat || '';
+    document.getElementById('f-ach2').value      = sub.ach2    || '';
+    document.getElementById('f-ach2-date').value = sub.ach2date|| '';
+    document.getElementById('f-statement').value = sub.statement|| '';
+    loadFilesIntoForm(sub.documents || []);
+    const dot  = document.getElementById('fp-dot');
+    const ftxt = document.getElementById('fp-text');
+    dot.className = 'fp-dot' + (sub.status === 'submitted' || sub.status === 'approved' ? ' done' : '');
+    ftxt.textContent = sub.status === 'submitted' ? 'Submitted — editing will reset to draft' : sub.status === 'approved' ? 'Approved — read only' : 'Draft — not yet submitted';
+    const isApproved = sub.status === 'approved';
+    ['f-ach1','f-ach1-cat','f-ach2','f-ach2-date','f-statement'].forEach(id => {
+      const el = document.getElementById(id);
+      if (isApproved) el.setAttribute('disabled', ''); else el.removeAttribute('disabled');
+    });
+  } else {
+    ['f-ach1','f-ach1-cat','f-ach2','f-ach2-date','f-statement'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el.tagName === 'INPUT') el.value = '';
+      if (el.tagName === 'TEXTAREA') el.value = '';
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      el.removeAttribute('disabled');
+    });
+    document.getElementById('fp-dot').className = 'fp-dot';
+    document.getElementById('fp-text').textContent = 'Draft — not yet submitted';
+    loadFilesIntoForm([]);
+  }
+  showPage('form-page');
+}
+
+function getFormData() {
+  return {
+    ach1:      document.getElementById('f-ach1').value,
+    ach1cat:   document.getElementById('f-ach1-cat').value,
+    ach2:      document.getElementById('f-ach2').value,
+    ach2date:  document.getElementById('f-ach2-date').value,
+    statement: document.getElementById('f-statement').value,
+  };
+}
+
+function saveDraft() {
+  const email = currentUser.email;
+  const existing = SUBMISSIONS[email] || {};
+  SUBMISSIONS[email] = { ...existing, ...getFormData(), status: 'draft', savedAt: new Date().toLocaleString(), documents: [...pendingFiles] };
+  document.getElementById('fp-dot').className = 'fp-dot';
+  document.getElementById('fp-text').textContent = 'Draft saved · ' + new Date().toLocaleTimeString();
+  showToast('Draft saved successfully!', '💾');
+}
+
+function submitForm() {
+  const data = getFormData();
+  const email = currentUser.email;
+  SUBMISSIONS[email] = { ...data, status: 'submitted', submittedAt: new Date().toLocaleString(), adminNote: '', documents: [...pendingFiles] };
+  document.getElementById('fp-dot').className = 'fp-dot done';
+  document.getElementById('fp-text').textContent = 'Submitted · ' + new Date().toLocaleTimeString();
+  showToast('Achievement record submitted to admin! 🎉', '📤');
+  setTimeout(() => { renderStudentDash(); showPage('student-page'); }, 1500);
+}
+
+// ═══════════════════════════════════════════════════════
+// ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderAdminDash() {
+  updateAdminBanner();
+  renderAdminTable();
+}
+
+function updateAdminBanner() {
+  const subs = Object.values(SUBMISSIONS);
+  const submitted = subs.filter(s => s.status === 'submitted' || s.status === 'approved').length;
+  const approved  = subs.filter(s => s.status === 'approved').length;
+  const draft     = subs.filter(s => s.status === 'draft').length;
+  document.getElementById('adm-total').textContent     = Object.keys(STUDENTS).length;
+  document.getElementById('adm-submitted').textContent = submitted;
+  document.getElementById('adm-approved').textContent  = approved;
+  document.getElementById('adm-draft').textContent     = draft;
+}
+
+function adminFilter(type, btn) {
+  adminFilter_ = type;
+  document.querySelectorAll('.admin-controls .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAdminTable();
+}
+
+function renderAdminTable() {
+  const search = document.getElementById('admin-search').value.toLowerCase();
+  const tbody  = document.getElementById('admin-tbody');
+  const empty  = document.getElementById('admin-empty');
+
+  let rows = Object.entries(STUDENTS).map(([email, stu]) => {
+    const sub = SUBMISSIONS[email] || null;
+    return { email, stu, sub };
+  });
+
+  // filter
+  rows = rows.filter(({ email, stu, sub }) => {
+    const matchSearch = !search || stu.name.toLowerCase().includes(search) || stu.roll.toLowerCase().includes(search);
+    if (!matchSearch) return false;
+    if (adminFilter_ === 'all')       return true;
+    if (adminFilter_ === 'submitted') return sub && (sub.status === 'submitted');
+    if (adminFilter_ === 'approved')  return sub && sub.status === 'approved';
+    if (adminFilter_ === 'draft')     return sub && sub.status === 'draft';
+    return true;
+  });
+
+  if (!rows.some(r => r.sub)) {
+    tbody.innerHTML = '';
+    empty.style.display = rows.length === 0 ? '' : 'none';
+  }
+
+  const statusCell = (sub) => {
+    if (!sub) return '<span class="sub-status" style="background:rgba(148,163,184,.1);color:var(--muted)">No Submission</span>';
+    const map = {
+      draft:     '<span class="sub-status ss-draft">🖊 Draft</span>',
+      submitted: '<span class="sub-status ss-submitted">📤 Submitted</span>',
+      approved:  '<span class="sub-status ss-approved">✅ Approved</span>',
+      rejected:  '<span class="sub-status" style="background:rgba(248,113,113,.15);color:var(--red)">❌ Rejected</span>',
+    };
+    return map[sub.status] || '';
+  };
+
+  tbody.innerHTML = rows.map(({ email, stu, sub }) => {
+    const canApprove = sub && sub.status === 'submitted';
+    const canReject  = sub && (sub.status === 'submitted' || sub.status === 'approved');
+    return `<tr onclick="openModal('${email}')">
+      <td><div class="stu-cell">
+        <div class="avatar" style="background:${stu.color}">${stu.initials}</div>
+        <div><div class="stu-name">${stu.name}</div></div>
+      </div></td>
+      <td><span style="font-size:12px;color:var(--muted)">${stu.roll}</span></td>
+      <td>${statusCell(sub)}</td>
+      <td onclick="event.stopPropagation()"><div class="admin-actions">
+        ${canApprove ? `<button class="action-btn ab-approve" onclick="approveSubmission('${email}')">✅ Approve</button>` : ''}
+        ${canReject  ? `<button class="action-btn ab-reject"  onclick="rejectSubmission('${email}')">❌ Reject</button>` : ''}
+        ${sub        ? `<button class="action-btn ab-view"    onclick="openModal('${email}')">👁 View</button>` : ''}
+        ${sub && sub.documents && sub.documents.length ? `<span style="font-size:11px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:var(--blue);border-radius:20px;padding:3px 8px;white-space:nowrap">📎 ${sub.documents.length}</span>` : ''}
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  if (rows.length === 0) {
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+  }
+}
+
+function approveSubmission(email) {
+  if (!SUBMISSIONS[email]) return;
+  SUBMISSIONS[email].status = 'approved';
+  SUBMISSIONS[email].approvedAt = new Date().toLocaleString();
+  SUBMISSIONS[email].adminNote = SUBMISSIONS[email].adminNote || 'Your record has been reviewed and approved. Well done!';
+  showToast(`${STUDENTS[email].name}'s submission approved ✅`);
+  renderAdminDash();
+}
+
+function rejectSubmission(email) {
+  const note = prompt(`Enter a note for ${STUDENTS[email].name} (optional):`);
+  if (note === null) return;
+  if (!SUBMISSIONS[email]) return;
+  SUBMISSIONS[email].status   = 'rejected';
+  SUBMISSIONS[email].adminNote= note || 'Please review and resubmit your achievement record.';
+  showToast(`Submission returned to ${STUDENTS[email].name}`, '❌');
+  renderAdminDash();
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(email) {
+  const stu = STUDENTS[email];
+  const sub = SUBMISSIONS[email];
+  if (!sub) return;
+
+  document.getElementById('modal-title').textContent = `${stu.name} — Achievement Detail`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.5rem">
+      <div class="avatar" style="background:${stu.color};width:52px;height:52px;font-size:18px">${stu.initials}</div>
+      <div>
+        <div style="font-family:var(--FH);font-size:20px;font-weight:800">${stu.name}</div>
+        <div style="font-size:13px;color:var(--muted)">${stu.roll} · S.Y. B.Tech IT · 2025-26</div>
+      </div>
+    </div>
+
+    ${sub.ach1 ? `
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Achievements</div>
+    <div style="background:var(--surface2);border-radius:var(--rs);padding:1rem;margin-bottom:.5rem">
+      <div style="font-size:14px;font-weight:600">🏆 ${sub.ach1}</div>
+      ${sub.ach1cat ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${sub.ach1cat}</div>` : ''}
+    </div>` : ''}
+    ${sub.ach2 ? `
+    <div style="background:var(--surface2);border-radius:var(--rs);padding:1rem;margin-bottom:.5rem">
+      <div style="font-size:14px;font-weight:600">🎖️ ${sub.ach2}</div>
+      ${sub.ach2date ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${sub.ach2date}</div>` : ''}
+    </div>` : ''}
+
+    ${sub.statement ? `
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Student Statement</div>
+    <div class="modal-note">${sub.statement}</div>` : ''}
+
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Submission Info</div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="mf-label">Status</div><div class="mf-val">${statusBadgeHTML(sub.status)}</div></div>
+      <div class="modal-field"><div class="mf-label">Submitted At</div><div class="mf-val" style="font-size:13px">${sub.submittedAt || '—'}</div></div>
+      ${sub.approvedAt ? `<div class="modal-field"><div class="mf-label">Approved At</div><div class="mf-val" style="font-size:13px">${sub.approvedAt}</div></div>` : ''}
+    </div>
+
+    ${sub.adminNote ? `
+    <div style="margin:1rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:1px">Admin Note</div>
+    <div class="modal-note">${sub.adminNote}</div>` : ''}
+
+    ${sub.documents && sub.documents.length ? `
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">📎 Uploaded Documents (${sub.documents.length})</div>
+    <div class="doc-list-admin">
+      ${sub.documents.map((doc, i) => `
+        <div class="dla-item">
+          <div class="dla-info">
+            <span style="font-size:18px">${getFileIcon(doc.type)}</span>
+            <div>
+              <div class="dla-name" title="${doc.name}">${doc.name}</div>
+              <div class="dla-meta">${formatSize(doc.size)}</div>
+            </div>
+          </div>
+          <a class="doc-download-btn" href="${doc.dataUrl}" download="${doc.name}" title="Download ${doc.name}">
+            ⬇️ Download
+          </a>
+        </div>`).join('')}
+    </div>` : (currentUser.type === 'admin' ? `
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">📎 Uploaded Documents</div>
+    <div style="background:var(--surface2);border-radius:var(--rs);padding:1rem;font-size:13px;color:var(--muted);text-align:center">No documents uploaded by this student.</div>` : '')}
+
+    ${currentUser.type === 'admin' ? `
+    <div style="margin:1.5rem 0 .5rem;font-family:var(--FH);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Add / Edit Admin Note</div>
+    <div class="fgroup">
+      <textarea class="finput" id="modal-admin-note" style="min-height:70px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:var(--FB);font-size:13px;outline:none;resize:vertical;width:100%" placeholder="Enter a note for this student…">${sub.adminNote||''}</textarea>
+    </div>` : ''}
+  `;
+
+  // footer buttons for admin
+  const footer = document.getElementById('modal-footer');
+  if (currentUser.type === 'admin') {
+    const canApprove = sub.status === 'submitted';
+    const canReject  = sub.status === 'submitted' || sub.status === 'approved';
+    footer.innerHTML = `
+      <button class="btn btn-outline" onclick="saveAdminNote('${email}')">💾 Save Note</button>
+      ${canApprove ? `<button class="btn btn-primary" onclick="approveSubmission('${email}');closeModalBtn()">✅ Approve</button>` : ''}
+      ${canReject  ? `<button class="btn btn-danger"  onclick="rejectSubmission('${email}');closeModalBtn()">❌ Reject</button>` : ''}
+    `;
+  } else {
+    footer.innerHTML = `<button class="btn btn-outline" onclick="closeModalBtn()">Close</button>`;
+  }
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function saveAdminNote(email) {
+  const note = document.getElementById('modal-admin-note')?.value;
+  if (note === undefined) return;
+  if (SUBMISSIONS[email]) {
+    SUBMISSIONS[email].adminNote = note;
+    showToast('Admin note saved.', '💾');
+  }
+}
+
+function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalBtn(); }
+function closeModalBtn() { document.getElementById('modal-overlay').classList.remove('show'); }
+</script>
+</body>
+</html>
